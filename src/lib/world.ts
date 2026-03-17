@@ -46,7 +46,7 @@ export interface DocumentRecord {
   extractedAt: string;
 }
 
-export const AgentGroupSchema = z.enum(["government", "public", "military", "business", "ngo", "media"]);
+export const AgentGroupSchema = z.enum(["government", "public", "military", "business", "ngo", "media", "whale", "retail", "miner", "institution", "bot"]);
 export type AgentGroup = z.infer<typeof AgentGroupSchema>;
 
 export interface Agent {
@@ -62,9 +62,11 @@ export interface Agent {
   confidence: number; // 0 to 1
   trust: Record<string, number>; // group -> 0 to 1
   emotion: number; // 0 to 1
+  influence: number; // 0 to 1, how much this agent affects others
 }
 
 export interface SimulationConfig {
+  mode: "geopolitics" | "crypto";
   numAgents: number;
   steps: number;
   randomSeed: number;

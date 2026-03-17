@@ -1,0 +1,168 @@
+{
+  "id": "e7dbd41",
+  "filename": "Senate_2026_01_20.pdf",
+  "worldState": {
+    "entities": [
+      {
+        "name": "Samantha Joy Mostyn",
+        "type": "person",
+        "attributes": [
+          "Governor-General",
+          "AC"
+        ]
+      },
+      {
+        "name": "Penny Wong",
+        "type": "person",
+        "attributes": [
+          "Senator",
+          "Leader of the Government in the Senate",
+          "Minister for Foreign Affairs"
+        ]
+      },
+      {
+        "name": "Anthony Albanese",
+        "type": "person",
+        "attributes": [
+          "Prime Minister",
+          "MP"
+        ]
+      },
+      {
+        "name": "Michaelia Cash",
+        "type": "person",
+        "attributes": [
+          "Senator",
+          "Leader of the Opposition in the Senate"
+        ]
+      },
+      {
+        "name": "Randa Abdel-Fattah",
+        "type": "person",
+        "attributes": [
+          "Dr.",
+          "Subject of parliamentary question"
+        ]
+      },
+      {
+        "name": "Australia",
+        "type": "country",
+        "attributes": []
+      },
+      {
+        "name": "Iran",
+        "type": "country",
+        "attributes": []
+      },
+      {
+        "name": "Australian Senate",
+        "type": "org",
+        "attributes": [
+          "Legislative body"
+        ]
+      },
+      {
+        "name": "Australian Labor Party",
+        "type": "group",
+        "attributes": [
+          "Political party",
+          "Governing party"
+        ]
+      },
+      {
+        "name": "Liberal Party of Australia",
+        "type": "group",
+        "attributes": [
+          "Political party",
+          "Opposition"
+        ]
+      },
+      {
+        "name": "National Jewish Memorial Centre",
+        "type": "org",
+        "attributes": [
+          "Jewish community organization"
+        ]
+      }
+    ],
+    "issues": [
+      {
+        "id": "antisemitism",
+        "topic": "Antisemitism",
+        "tension": "Rising antisemitic incidents and concerns within Australian society"
+      },
+      {
+        "id": "bondi_attack",
+        "topic": "Bondi Beach Attack",
+        "tension": "Public safety and security concerns following a violent attack at Bondi Beach"
+      },
+      {
+        "id": "abdel_fattah",
+        "topic": "Dr Randa Abdel-Fattah",
+        "tension": "Human rights and legal issues surrounding Dr. Randa Abdel-Fattah"
+      },
+      {
+        "id": "fossil_fuel",
+        "topic": "Fossil Fuel Industry",
+        "tension": "Debate over the future of fossil fuel industry and its economic and environmental impacts"
+      },
+      {
+        "id": "jewish_memorial",
+        "topic": "National Jewish Memorial Centre",
+        "tension": "Support and funding for the National Jewish Memorial Centre"
+      },
+      {
+        "id": "iran_hr",
+        "topic": "Iran: Human Rights",
+        "tension": "International criticism of human rights violations in Iran"
+      },
+      {
+        "id": "natural_disasters",
+        "topic": "Australia: Natural Disasters",
+        "tension": "Management and response to natural disasters including bushfires and floods"
+      },
+      {
+        "id": "gun_control",
+        "topic": "Gun Control",
+        "tension": "Policy discussions on firearm regulations and gun violence prevention"
+      }
+    ],
+    "claims": [],
+    "time_horizon": "near",
+    "risks": [
+      {
+        "description": "Increased antisemitism could lead to social division and violence",
+        "severity": 4
+      },
+      {
+        "description": "Terrorist attacks like Bondi Beach incident may recur, threatening public safety",
+        "severity": 5
+      },
+      {
+        "description": "Human rights cases involving individuals like Dr. Abdel-Fattah may strain diplomatic relations",
+        "severity": 3
+      },
+      {
+        "description": "Rapid transition from fossil fuels may cause economic instability in dependent regions",
+        "severity": 3
+      },
+      {
+        "description": "Insufficient support for Jewish memorial centre could harm community relations",
+        "severity": 2
+      },
+      {
+        "description": "Iran's human rights abuses may escalate regional tensions and conflicts",
+        "severity": 4
+      },
+      {
+        "description": "Climate change-induced natural disasters could overwhelm response capabilities",
+        "severity": 5
+      },
+      {
+        "description": "Lax gun control laws may result in increased gun violence incidents",
+        "severity": 4
+      }
+    ]
+  },
+  "extractedAt": "2026-03-17T10:15:40.199Z"
+}

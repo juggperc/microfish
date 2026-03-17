@@ -9,20 +9,36 @@ function createSeededRandom(seed: number) {
   };
 }
 
+const INFLUENCE_MAP: Record<AgentGroup, number> = {
+  whale: 0.9,
+  media: 0.8,
+  government: 0.8,
+  institution: 0.7,
+  military: 0.6,
+  business: 0.6,
+  miner: 0.5,
+  bot: 0.4,
+  ngo: 0.4,
+  public: 0.1,
+  retail: 0.1
+};
+
 export function generateAgents(world: WorldState, config: SimulationConfig): Agent[] {
   const rng = createSeededRandom(config.randomSeed);
-  const groups: AgentGroup[] = ["government", "public", "military", "business", "ngo", "media"];
+  
+  const groups: AgentGroup[] = config.mode === "crypto" 
+    ? ["whale", "retail", "retail", "retail", "miner", "institution", "bot", "media"]
+    : ["government", "public", "public", "public", "military", "business", "ngo", "media"];
   
   const agents: Agent[] = [];
   
   // Base issues and sentiments derived from claims
   const issueSentiments: Record<string, number> = {};
   (world.claims || []).forEach(c => {
-    // roughly associate claim object with issue if mentioned
     const matchedIssue = (world.issues || []).find(i => c.object?.toLowerCase().includes(i.topic?.toLowerCase() || "") || i.topic?.toLowerCase().includes(c.object?.toLowerCase() || ""));
     if (matchedIssue) {
       if (!issueSentiments[matchedIssue.id]) issueSentiments[matchedIssue.id] = 0;
-      issueSentiments[matchedIssue.id] += c.stance * (1 - c.uncertainty); // Higher certainty = stronger weight
+      issueSentiments[matchedIssue.id] += c.stance * (1 - c.uncertainty);
     }
   });
 
@@ -36,13 +52,23 @@ export function generateAgents(world: WorldState, config: SimulationConfig): Age
     (world.issues || []).forEach(issue => {
       // Base belief around the world sentiment + random noise
       const base = issueSentiments[issue.id] || 0;
-      beliefs[issue.id] = Math.max(-1, Math.min(1, base + (rng() * 2 - 1) * 0.5));
+      // Retail/Public more volatile, Institutions/Government more stable
+      const volatility = (group === "retail" || group === "public") ? 0.8 : 0.3;
+      beliefs[issue.id] = Math.max(-1, Math.min(1, base + (rng() * 2 - 1) * volatility));
     });
 
     const trust: Record<string, number> = {};
     groups.forEach(g => {
-      trust[g] = g === group ? 0.8 + rng()*0.2 : rng(); // High trust in own group, random in others
+      // Echo chamber tendency: high trust in own group, lower elsewhere. Retail trusts whales somewhat but not always.
+      if (g === group) trust[g] = 0.8 + rng() * 0.2;
+      else if (group === "retail" && g === "whale") trust[g] = 0.6 + rng() * 0.4;
+      else if (group === "public" && g === "media") trust[g] = 0.5 + rng() * 0.4;
+      else trust[g] = rng() * 0.5; // low baseline trust
     });
+
+    // Influence assignment + random noise to make some retail influencers, etc.
+    const baseInfluence = INFLUENCE_MAP[group];
+    const influence = Math.max(0, Math.min(1, baseInfluence + (rng() * 0.2 - 0.1)));
 
     agents.push({
       id: `agent-${i}`,
@@ -54,9 +80,10 @@ export function generateAgents(world: WorldState, config: SimulationConfig): Age
         dovish: rng()
       },
       beliefs,
-      confidence: 0.5 + rng() * 0.5,
+      confidence: 0.4 + rng() * 0.6,
       trust,
-      emotion: riskFactor * rng() // Emotion influenced by world risk
+      emotion: riskFactor * rng(), // Emotion influenced by world risk
+      influence
     });
   }
   
@@ -113,17 +140,37 @@ export function runSimulation(world: WorldState, config: SimulationConfig, agent
   for (let step = 1; step <= config.steps; step++) {
     const nextAgents = JSON.parse(JSON.stringify(currentAgents)) as Agent[];
     let maxDisagreement = 0;
+    let shockOccurred = false;
+    let shockEvent = "";
     
-    // At each tick, pair agents randomly
+    // Introduce random external shock (like MiroFish "news breaks")
+    if (rng() > 0.85) {
+      shockOccurred = true;
+      const shockImpact = (rng() * 0.4) - 0.2; // -0.2 to 0.2
+      const targetIssue = (world.issues || [])[Math.floor(rng() * (world.issues || []).length)];
+      if (targetIssue) {
+         shockEvent = `Random Shock: Sudden news impacted sentiment on '${targetIssue.topic}' by ${shockImpact > 0 ? '+' : ''}${(shockImpact*100).toFixed(0)}%`;
+         nextAgents.forEach(a => {
+             // Emotion makes them more susceptible
+             a.beliefs[targetIssue.id] = Math.max(-1, Math.min(1, a.beliefs[targetIssue.id] + (shockImpact * a.emotion)));
+         });
+      }
+    }
+
+    // At each tick, agent interacts
     for (let i = 0; i < nextAgents.length; i++) {
       const a = nextAgents[i];
-      // Random partner
-      const bIndex = Math.floor(rng() * nextAgents.length);
-      const b = nextAgents[bIndex];
       
+      // Select partner using preferential attachment (more likely to interact with highly influential agents)
+      let bIndex = Math.floor(rng() * nextAgents.length);
+      for(let retry=0; retry<3; retry++){
+          if(nextAgents[bIndex].influence > rng()) break;
+          bIndex = Math.floor(rng() * nextAgents.length);
+      }
+      
+      const b = nextAgents[bIndex];
       if (a.id === b.id) continue;
       
-      // Update beliefs
       const trustAB = a.trust[b.group] || 0.1;
       
       (world.issues || []).forEach(issue => {
@@ -133,28 +180,41 @@ export function runSimulation(world: WorldState, config: SimulationConfig, agent
         
         maxDisagreement = Math.max(maxDisagreement, diff);
         
-        // DeGroot-style update if trust is high enough or difference is small
-        if (trustAB > 0.3 || diff < 0.5) {
-          // move belief towards B proportional to trust and B's confidence
-          const shift = (beliefB - beliefA) * trustAB * b.confidence * 0.1;
+        // MiroFish Bounded Confidence + Influence
+        // A updates belief towards B only if difference is within confidence bound, OR B is highly influential/trusted
+        if (diff < a.confidence || trustAB > 0.6 || b.influence > 0.8) {
+          // move belief towards B proportional to trust, B's influence, and B's confidence
+          const shift = (beliefB - beliefA) * trustAB * b.influence * b.confidence * 0.2;
           a.beliefs[issue.id] = Math.max(-1, Math.min(1, beliefA + shift));
-        } else if (trustAB < 0.2 && diff > 1.0) {
-          // Polarization: move away
-          const shift = (beliefA > 0 ? 0.1 : -0.1) * (1 - trustAB);
+          
+          // A's confidence might increase if B agrees, or decrease if forced to shift a lot
+          if (diff < 0.2) a.confidence = Math.min(1, a.confidence + 0.01);
+          else a.confidence = Math.max(0, a.confidence - 0.05);
+          
+        } else if (trustAB < 0.3 && diff > 1.0) {
+          // Polarization / Echo chamber reaction: move away
+          const shift = (beliefA > 0 ? 0.1 : -0.1) * (1 - trustAB) * a.emotion;
           a.beliefs[issue.id] = Math.max(-1, Math.min(1, beliefA + shift));
+          // Increase emotion when arguing
+          a.emotion = Math.min(1, a.emotion + 0.05);
         }
       });
       
-      // Update emotion based on disagreement
-      a.emotion = Math.max(0, Math.min(1, a.emotion + (maxDisagreement * 0.05) - 0.01));
+      // Decay emotion back to baseline slowly
+      a.emotion = Math.max(0, a.emotion - 0.01);
     }
     
     currentAgents = nextAgents;
     
     // Record timeline events heuristically
     const stepEvents: string[] = [];
+    if (shockOccurred) {
+        stepEvents.push(shockEvent);
+        timeline.push({ step, event: shockEvent });
+    }
+    
     if (step === Math.floor(config.steps / 2) && maxDisagreement > 1.5) {
-      const msg = "A major polarization rift appeared mid-simulation.";
+      const msg = "A major polarization rift appeared mid-simulation between factions.";
       timeline.push({ step, event: msg });
       stepEvents.push(msg);
     }

@@ -6,6 +6,7 @@ import { BarChart, Bar, XAxis, Tooltip, ResponsiveContainer } from "recharts";
 import { WorldState, SimulationResult } from "@/lib/world";
 
 export default function Home() {
+  const [mode, setMode] = useState<"geopolitics" | "crypto">("geopolitics");
   const [file, setFile] = useState<File | null>(null);
   const [uploading, setUploading] = useState(false);
   const [documentId, setDocumentId] = useState<string | null>(null);
@@ -42,6 +43,26 @@ export default function Home() {
     }
     return () => clearInterval(interval);
   }, [isPlaying, simResult]);
+
+  const handleBtcIngest = async () => {
+    setUploading(true);
+    try {
+      const res = await fetch("/api/btc-ingest", { method: "POST" });
+      const data = await res.json();
+      if (data.error) throw new Error(data.error);
+
+      setDocumentId(data.documentId);
+      setWorldState(data.worldState);
+      setUpdatedWorld(data.worldState);
+      setSimResult(null);
+      setReport(null);
+      setIsPlaying(false);
+    } catch (err: unknown) {
+      alert("BTC Ingest failed: " + (err as Error).message);
+    } finally {
+      setUploading(false);
+    }
+  };
 
   const handleUpload = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -82,7 +103,7 @@ export default function Home() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           documentId,
-          config: { numAgents, steps, randomSeed },
+          config: { mode, numAgents, steps, randomSeed },
           deltaText
         }),
       });
@@ -113,7 +134,8 @@ export default function Home() {
         body: JSON.stringify({
           simulationResult: simResult,
           worldState: updatedWorld,
-          question: "Generate a summary report of this scenario's outcome."
+          mode,
+          question: mode === "crypto" ? "Generate a summary report of this market scenario's outcome, predicting likely price action based on agent behavior." : "Generate a summary report of this scenario's outcome."
         }),
       });
       const data = await res.json();
@@ -134,32 +156,64 @@ export default function Home() {
     <div className="min-h-screen bg-neutral-900 text-neutral-100 p-8 font-sans">
       <div className="max-w-5xl mx-auto space-y-8">
         
-        <header className="flex items-center space-x-3 pb-6 border-b border-neutral-800">
-          <Activity className="w-8 h-8 text-blue-500" />
-          <h1 className="text-3xl font-bold tracking-tight text-white">MicroFish</h1>
-          <span className="text-neutral-400">| Scenario Simulator</span>
+        <header className="flex flex-col md:flex-row items-start md:items-center justify-between pb-6 border-b border-neutral-800 gap-4">
+          <div className="flex items-center space-x-3">
+            <Activity className="w-8 h-8 text-blue-500" />
+            <h1 className="text-3xl font-bold tracking-tight text-white">MicroFish</h1>
+            <span className="text-neutral-400">| Scenario Simulator</span>
+          </div>
+          <div className="flex bg-neutral-900 border border-neutral-700 rounded-lg p-1">
+            <button 
+              onClick={() => { setMode("geopolitics"); setWorldState(null); setSimResult(null); }}
+              className={`px-4 py-1.5 rounded-md text-sm font-medium transition ${mode === "geopolitics" ? "bg-neutral-700 text-white" : "text-neutral-400 hover:text-white"}`}
+            >
+              Geopolitics
+            </button>
+            <button 
+              onClick={() => { setMode("crypto"); setWorldState(null); setSimResult(null); }}
+              className={`px-4 py-1.5 rounded-md text-sm font-medium transition ${mode === "crypto" ? "bg-neutral-700 text-white" : "text-neutral-400 hover:text-white"}`}
+            >
+              Crypto Markets
+            </button>
+          </div>
         </header>
 
         {/* Upload Section */}
         <section className="bg-neutral-800 rounded-xl p-6 border border-neutral-700">
           <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
-            <Upload className="w-5 h-5" /> 1. Ingest Scenario (PDF)
+            <Upload className="w-5 h-5" /> 1. Ingest Scenario
           </h2>
-          <form onSubmit={handleUpload} className="flex gap-4 items-center">
-            <input
-              type="file"
-              accept="application/pdf"
-              onChange={(e) => setFile(e.target.files?.[0] || null)}
-              className="block w-full text-sm text-neutral-400 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-600 file:text-white hover:file:bg-blue-700 cursor-pointer"
-            />
-            <button
-              type="submit"
-              disabled={!file || uploading}
-              className="bg-blue-600 hover:bg-blue-500 disabled:opacity-50 text-white px-6 py-2 rounded-full font-medium transition"
-            >
-              {uploading ? "Extracting..." : "Upload & Parse"}
-            </button>
-          </form>
+          
+          {mode === "geopolitics" ? (
+            <form onSubmit={handleUpload} className="flex gap-4 items-center">
+              <input
+                type="file"
+                accept="application/pdf"
+                onChange={(e) => setFile(e.target.files?.[0] || null)}
+                className="block w-full text-sm text-neutral-400 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-600 file:text-white hover:file:bg-blue-700 cursor-pointer"
+              />
+              <button
+                type="submit"
+                disabled={!file || uploading}
+                className="bg-blue-600 hover:bg-blue-500 disabled:opacity-50 text-white px-6 py-2 rounded-full font-medium transition shrink-0"
+              >
+                {uploading ? "Extracting..." : "Upload & Parse PDF"}
+              </button>
+            </form>
+          ) : (
+            <div className="flex items-center gap-4">
+              <p className="text-sm text-neutral-400 flex-1">
+                Fetch live, historical daily Bitcoin price data from Binance (last 30 days) to construct a localized crypto market simulation environment. No API key required.
+              </p>
+              <button
+                onClick={handleBtcIngest}
+                disabled={uploading}
+                className="bg-orange-600 hover:bg-orange-500 disabled:opacity-50 text-white px-6 py-2 rounded-full font-medium transition shrink-0"
+              >
+                {uploading ? "Fetching..." : "Ingest Live BTC Data"}
+              </button>
+            </div>
+          )}
         </section>
 
         {/* Extracted World State */}

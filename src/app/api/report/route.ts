@@ -13,13 +13,16 @@ You must write a concise, analytic report with the following sections:
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
-    const { simulationResult, worldState, question } = body as { simulationResult: SimulationResult, worldState: WorldState, question?: string };
+    const { simulationResult, worldState, question, mode } = body as { simulationResult: SimulationResult, worldState: WorldState, question?: string, mode?: string };
 
     if (!simulationResult || !worldState) {
       return NextResponse.json({ error: "Missing simulationResult or worldState" }, { status: 400 });
     }
 
-    const prompt = `Original User Question: ${question || "Analyze the simulation results."}
+    const contextContext = mode === "crypto" ? "This is a Crypto Market behavior simulation based on real BTC price data." : "This is a geopolitical/social agent-based simulation.";
+
+    const prompt = `Context: ${contextContext}
+Original User Question: ${question || "Analyze the simulation results."}
 
 World State:
 ${JSON.stringify(worldState, null, 2)}

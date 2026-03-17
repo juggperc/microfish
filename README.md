@@ -4,17 +4,27 @@ A minimal, production-grade Next.js web application for simulating predictive sc
 
 ## Overview
 
-MicroFish uses Large Language Models to extract a structured **World State** (Entities, Issues, Risks) from uploaded PDF documents. It then deploys an agent-based simulation engine to run behavioral interactions between dynamically generated archetype agents (e.g., government, public, military, media) over a series of steps. Finally, it uses AI to summarize the simulated timeline and resulting polarization into a narrative report.
+MicroFish uses Large Language Models to extract a structured **World State** (Entities, Issues, Risks) from uploaded PDF documents **OR from Live Bitcoin Price data**. It then deploys an agent-based simulation engine to run behavioral interactions between dynamically generated archetype agents (e.g., government, public, military, media OR whales, retail, miners, bots) over a series of steps. Finally, it uses AI to summarize the simulated timeline and resulting polarization into a narrative report.
 
 ## Flowcharts
 
-### 1. Ingestion Flow (PDF to World State)
+### 1A. Ingestion Flow (PDF to Geopolitical World State)
 ```mermaid
 graph TD
     A[User Uploads PDF] --> B[Next.js API: /api/upload]
     B --> C[pdf-parse extracts text]
     C --> D[OpenRouter LLM Extracts JSON]
     D --> E[World State stored in memory/disk]
+    E --> F[UI displays Entities, Issues & Risks]
+```
+
+### 1B. Ingestion Flow (Live BTC to Crypto Market State)
+```mermaid
+graph TD
+    A[User Clicks 'Ingest Live BTC'] --> B[Next.js API: /api/btc-ingest]
+    B --> C[Fetch 30-day Klines from Binance API]
+    C --> D[OpenRouter LLM Analyzes Trends & Volume]
+    D --> E[Market State JSON extracted]
     E --> F[UI displays Entities, Issues & Risks]
 ```
 
