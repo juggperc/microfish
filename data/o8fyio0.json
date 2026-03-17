@@ -1,0 +1,184 @@
+{
+  "id": "o8fyio0",
+  "filename": "Senate_2026_01_20.pdf",
+  "worldState": {
+    "entities": [
+      {
+        "name": "Penny Wong",
+        "type": "person",
+        "attributes": [
+          "Foreign Minister",
+          "Government Leader in Senate",
+          "ALP"
+        ]
+      },
+      {
+        "name": "Anthony Albanese",
+        "type": "person",
+        "attributes": [
+          "Prime Minister",
+          "ALP"
+        ]
+      },
+      {
+        "name": "Sussan Ley",
+        "type": "person",
+        "attributes": [
+          "Opposition Leader",
+          "Liberal"
+        ]
+      },
+      {
+        "name": "Australian Labor Party (ALP)",
+        "type": "org",
+        "attributes": [
+          "governing party"
+        ]
+      },
+      {
+        "name": "Liberal Party",
+        "type": "org",
+        "attributes": [
+          "opposition party"
+        ]
+      },
+      {
+        "name": "Australian Greens",
+        "type": "org",
+        "attributes": [
+          "minor party in Senate"
+        ]
+      },
+      {
+        "name": "Pauline Hanson's One Nation",
+        "type": "org",
+        "attributes": [
+          "minor party in Senate"
+        ]
+      },
+      {
+        "name": "Iran",
+        "type": "country",
+        "attributes": [
+          "subject of human rights discussion"
+        ]
+      },
+      {
+        "name": "Israel",
+        "type": "country",
+        "attributes": [
+          "referenced in antisemitism context"
+        ]
+      },
+      {
+        "name": "Jewish community",
+        "type": "group",
+        "attributes": [
+          "affected by antisemitism"
+        ]
+      },
+      {
+        "name": "Bondi Beach community",
+        "type": "group",
+        "attributes": [
+          "affected by attacks"
+        ]
+      },
+      {
+        "name": "Natural disaster-affected regions",
+        "type": "group",
+        "attributes": [
+          "within Australia"
+        ]
+      }
+    ],
+    "issues": [
+      {
+        "id": "issue_1",
+        "topic": "Antisemitism",
+        "tension": "Government and community response to rising antisemitism vs. critiques of adequacy"
+      },
+      {
+        "id": "issue_2",
+        "topic": "Bondi Beach Attacks",
+        "tension": "Public safety and policing in response to violent incidents"
+      },
+      {
+        "id": "issue_3",
+        "topic": "Iran Human Rights",
+        "tension": "Australia's foreign policy stance and potential sanctions vs. diplomatic engagement"
+      },
+      {
+        "id": "issue_4",
+        "topic": "Natural Disasters",
+        "tension": "Climate change adaptation, federal funding, and emergency management coordination"
+      },
+      {
+        "id": "issue_5",
+        "topic": "Gun Control",
+        "tension": "Potential legislative changes vs. rural/regional community rights and gun ownership"
+      }
+    ],
+    "claims": [
+      {
+        "subject": "Australian Government",
+        "predicate": "is addressing",
+        "object": "rising antisemitism effectively",
+        "stance": 0,
+        "uncertainty": 0.8
+      },
+      {
+        "subject": "Government response",
+        "predicate": "is sufficient for",
+        "object": "Bondi Beach attack security",
+        "stance": 0,
+        "uncertainty": 0.7
+      },
+      {
+        "subject": "Australia",
+        "predicate": "should impose sanctions on",
+        "object": "Iran over human rights abuses",
+        "stance": 0,
+        "uncertainty": 0.6
+      },
+      {
+        "subject": "Natural disaster funding",
+        "predicate": "is inadequate for",
+        "object": "climate change impacts",
+        "stance": 0,
+        "uncertainty": 0.5
+      },
+      {
+        "subject": "Gun control laws",
+        "predicate": "need tightening after",
+        "object": "recent incidents",
+        "stance": 0,
+        "uncertainty": 0.6
+      }
+    ],
+    "time_horizon": "near",
+    "risks": [
+      {
+        "description": "Social cohesion deterioration due to unresolved antisemitism and community tensions",
+        "severity": 4
+      },
+      {
+        "description": "Escalation of public safety concerns following repeat attacks in tourist areas like Bondi Beach",
+        "severity": 4
+      },
+      {
+        "description": "Diplomatic friction with Iran and regional instability if Australia adopts a confrontational human rights stance",
+        "severity": 3
+      },
+      {
+        "description": "Insufficient disaster preparedness leading to higher casualties and economic loss in future climate events",
+        "severity": 5
+      },
+      {
+        "description": "Political polarization and potential civil unrest over gun control legislative proposals",
+        "severity": 3
+      }
+    ]
+  },
+  "extractedAt": "2026-03-17T07:41:31.895Z"
+}
